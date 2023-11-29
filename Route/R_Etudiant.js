@@ -51,18 +51,20 @@ router_Etudiant.get("/Lister",(req,res)=>{
         res.send('error');
     });
 });
- router_Etudiant.post("/Connexion",(req,res)=>{
+ router_Etudiant.post("/Connexion", async (req,res)=>{
     data = req.body;
-    N_Etudiant.findOne({Email : data.Email}).then(()=>{
-
-        let Passe =  cryptage.compareSync(data.Mot_De_Pass,N_Etudiant.Mot_De_Pass);
+   user = await N_Etudiant.findOne({Email : data.Email})
+    if (!user){
+        res.status(401).send("Email Icorrect");
+    }else{
+        let Passe =  cryptage.compareSync(data.Mot_De_Pass,user.Mot_De_Pass);
          if(!Passe){
              res.send("Mot de Passe Icorrect");
          }else{
              payload = {
-                 __id : N_Etudiant._id ,
-                 email : N_Etudiant.Email ,
-                 motdepasse : N_Etudiant.NomPrenom
+                 __id : user._id ,
+                 email : user.Email ,
+                 motdepasse : user.NomPrenom
              }
             let userToken = jwt.sign(payload,'24884920');
              res.status(200).send({mytoken : userToken})
