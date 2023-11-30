@@ -19,6 +19,19 @@ const mystorge=mult.diskStorage({
 
 const upload = mult({storage : mystorge});
 
+
+VerifierToken = (req,res,next)=>{
+    let token = req.headers.autorization;
+    if (!token){
+        res.send("Acces Rejected !!!")
+    }
+    try {
+        jwt.verify(token,"24884920");
+        next();
+    } catch (error) {
+        res.send(error)
+    }
+}
 router_Etudiant.post("/InscriptionEtudiant", upload.any('img'), (req,res)=>{
     
         data = req.body;
@@ -44,35 +57,41 @@ router_Etudiant.post("/SignIn",(req,res)=>{
 });
 
 
-router_Etudiant.get("/Lister",(req,res)=>{
+router_Etudiant.get("/Lister",VerifierToken,(req,res)=>{
     N_Etudiant.find().then((result)=>{
         res.send(result);
     }).catch(()=>{
         res.send('error');
     });
 });
+
+
  router_Etudiant.post("/Connexion", async (req,res)=>{
     data = req.body;
    user = await N_Etudiant.findOne({Email : data.Email})
     if (!user){
         res.status(401).send("Email Icorrect");
     }else{
-        let Passe =  cryptage.compareSync(data.Mot_De_Pass,user.Mot_De_Pass);
-         if(!Passe){
-             res.send("Mot de Passe Icorrect");
-         }else{
-             payload = {
-                 __id : user._id ,
-                 email : user.Email ,
-                 motdepasse : user.NomPrenom
-             }
-            let userToken = jwt.sign(payload,'24884920');
-             res.status(200).send({mytoken : userToken})
-         }
-    });
+        cryptage.compare(data.Mot_De_Pass,user.Mot_De_Pass).then((Passe)=>{
+
+            if(!Passe){
+                res.send("Mot de Passe Icorrect");
+            }else{
+                payload = {
+                    __id : user._id ,
+                    email : user.Email ,
+                    motdepasse : user.NomPrenom
+                }
+               let userToken = jwt.sign(payload,'24884920');
+                res.status(200).send({mytoken : userToken})
+            }
+
+        });
+    }
+});
     
    
-    });
+
 
 router_Etudiant.put("/Modifier",(req,res)=>{});
 router_Etudiant.delete("/Supprimer",(req,res)=>{});
