@@ -4,6 +4,8 @@ const N_Etudiant = require("../Models/Etudiant");
 const mult = require("multer");
 const cryptage = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const LocalStorage = require('node-localstorage').LocalStorage;
+const localStorage = new LocalStorage('./scratch');
 
 //--------------------------------------------------------------
 
@@ -21,17 +23,18 @@ const mystorge = mult.diskStorage({
 const upload = mult({ storage: mystorge });
 
 
-VerifierToken = (req, res, next) =>
- { let token = req.headers.authorization;
-     if (!token) {
-         res.send(" Acces rejected  !!! Bara ched darkom ")
-         } try {
-             jwt.verify(token, user.Mot_De_Pass);
-              next(); 
-            } catch (error) {
-                 res.status(500).send(error) 
-                } }
-                
+VerifierToken = (req, res, next) => {
+    let token = req.headers.authorization;
+    if (!token) {
+        res.send(" Acces rejected  !!! Bara ched darkom ")
+    } try {
+        jwt.verify(token, user.Mot_De_Pass);
+        next();
+    } catch (error) {
+        res.status(500).send(error)
+    }
+}
+
 //_____________________________________________________________________________________________________
 
 router_Etudiant.post("/InscriptionEtudiant", upload.any('img'), (req, res) => {
@@ -52,11 +55,7 @@ router_Etudiant.post("/InscriptionEtudiant", upload.any('img'), (req, res) => {
 }
 );
 
-router_Etudiant.post("/SignIn", (req, res) => {
-    data = req.body;
 
-
-});
 
 
 router_Etudiant.get("/Lister", VerifierToken, (req, res) => {
@@ -68,7 +67,7 @@ router_Etudiant.get("/Lister", VerifierToken, (req, res) => {
 });
 
 
-router_Etudiant.post("/SIGN", async (req, res) => {
+router_Etudiant.post("/login", async (req, res) => {
     data = req.body;
     user = await N_Etudiant.findOne({ Email: data.Email })
     if (!user) {
@@ -85,9 +84,9 @@ router_Etudiant.post("/SIGN", async (req, res) => {
 
             }
             tokenE = jwt.sign(payload, user.Mot_De_Pass, { expiresIn: "1h" });
-            res.status(200).send({ MyToken: tokenE });
-            localStorage.setItem({ MyToken: tokenE });
-            console.log(localStorage.getItem(MyToken))
+            res.status(200).send({ MyToken: tokenE })
+            const token = tokenE;
+            localStorage.setItem('token', token);
         }
     }
 });
