@@ -10,6 +10,7 @@ app.use((req,res,next)=>{
     res.setHeader('Access-Control-Allow-Headers','*')
     next()
 })
+app.use("/GetImage",exp.static("./Images"))
 app.use("/Etudiant",Shema_Etudiant);
 app.use("/Enseignant",Shema_Enseignant);
 app.listen(3000,()=>{

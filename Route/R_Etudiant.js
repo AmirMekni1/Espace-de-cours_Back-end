@@ -80,13 +80,11 @@ router_Etudiant.post("/login", async (req, res) => {
             payload = {
                 id: user._id,
                 NomPrenom: user.NomPrenom,
-                image: user.image
-
+                image: user.image,
+                Email : user.Email
             }
             tokenE = jwt.sign(payload, user.Mot_De_Pass, { expiresIn: "1h" });
             res.status(200).send({ MyToken: tokenE })
-            const token = tokenE;
-            localStorage.setItem('token', token);
         }
     }
 });
@@ -95,6 +93,7 @@ router_Etudiant.post("/login", async (req, res) => {
 
 
 
-router_Etudiant.put("/Modifier", (req, res) => { });
+
+
 router_Etudiant.delete("/Supprimer", (req, res) => { });
 module.exports = router_Etudiant;
