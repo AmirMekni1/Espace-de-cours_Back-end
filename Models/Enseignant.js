@@ -6,7 +6,8 @@ const EnseignantModel = mongo.model("Enseignant",{
     Mot_De_Pass   :     {type : String},
     Verification  :     {type : String , default : false},
     Role          :     {type : String},
-    image         :     {type : String}
+    image         :     {type : String},
+    CDCE          :     {type : String}
 
 });
 module.exports = EnseignantModel;

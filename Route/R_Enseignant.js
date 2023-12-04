@@ -1,6 +1,6 @@
 const exp = require('express');
-const router_Etudiant = exp.Router();
-const N_Etudiant = require("../Models/Etudiant");
+const router_Enseignant = exp.Router();
+const N_Enseignant = require("../Models/Enseignant");
 const mult = require("multer");
 const cryptage = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -47,7 +47,7 @@ VerifierToken = (req, res, next) => {
 //___________________________________________________________________________________________________________________________________________________________________________
 
 
-router_Etudiant.post("/InscriptionEtudiant", upload.any('img'), (req, res) => {
+router_Enseignant.post("/InscriptionEnseignant", upload.any('img'), (req, res) => {
 
     let resultat = require("crypto").randomBytes(32).toString("hex")
 
@@ -55,7 +55,7 @@ router_Etudiant.post("/InscriptionEtudiant", upload.any('img'), (req, res) => {
     cle = cryptage.genSaltSync(10);
     passwordCrypter = cryptage.hashSync(data.Mot_De_Pass, cle);
     data.Mot_De_Pass = passwordCrypter;
-    po = new N_Etudiant(data);
+    po = new N_Enseignant(data);
     po.image = photoname;
     po.CDCE = resultat
     po.save().then(() => {
@@ -71,32 +71,33 @@ router_Etudiant.post("/InscriptionEtudiant", upload.any('img'), (req, res) => {
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
-
-router_Etudiant.post("/verifierEmail/:id", async (req, res) => {
-    const cle = req.params.id
-    N_Etudiant.findOne({ CDCE: cle }).then((ok) => {
-        if (ok) {
-            ok.Verification = "true"
-            ok.save()
-            res.send('Etu')
-        } 
-    }).catch(()=>
-    {
-        N_Enseignant.findOne({ CDCE: cle }).then((ox) => {
-            if (ox) {
-                ox.Verification = "true"
-                ox.save()
-                res.send('Ens')
-            }
-        })
-    })
+router_Enseignant.post("/login", async (req, res) => {
+    data = req.body;
+const userEn = await N_Enseignant.findOne({ Email: data.Email })
+if (!userEn) {
+    res.status(401).send("Email Icorrect");
+} else {
+    verifPass = cryptage.compareSync(data.Mot_De_Pass, userEn.Mot_De_Pass);
+    if (!verifPass) {
+        res.status(402).send("Password Icorrect");
+    } else if (userEn.Verification == "true") {
+        payload = {
+            id: userEn._id,
+            NomPrenom: userEn.NomPrenom,
+            image: userEn.image,
+            Email: userEn.Email,
+            Role: userEn.Role
+        }
+        tokenE = jwt.sign(payload, userEn.Mot_De_Pass, { expiresIn: "1h" });
+        res.status(200).send({ MyToken: tokenE })
+    }
+}
 })
-
 //___________________________________________________________________________________________________________________________________________________________________________
 
 
-router_Etudiant.get("/Lister", VerifierToken, (req, res) => {
-    N_Etudiant.find().then((result) => {
+router_Enseignant.get("/Lister", VerifierToken, (req, res) => {
+    N_Enseignant.find().then((result) => {
         res.send(result);
     }).catch(() => {
         res.send('error');
@@ -106,24 +107,24 @@ router_Etudiant.get("/Lister", VerifierToken, (req, res) => {
 //___________________________________________________________________________________________________________________________________________________________________________
 
 
-router_Etudiant.post("/login", async (req, res) => {
+router_Enseignant.post("/login", (req, res) => {
     data = req.body;
-    const userET = await N_Etudiant.findOne({ Email: data.Email })
-    if (!userET) {
+    user = N_Enseignant.findOne({ Email: data.Email })
+    if (!user) {
         res.status(401).send("Email Icorrect");
     } else {
-        verifPass = cryptage.compareSync(data.Mot_De_Pass, userET.Mot_De_Pass);
+        verifPass = cryptage.compareSync(data.Mot_De_Pass, user.Mot_De_Pass);
         if (!verifPass) {
             res.status(402).send("Password Icorrect");
-        } else if (userET.Verification == "true") {
+        } else if (user.Verification == "true") {
             payload = {
-                id: userET._id,
-                NomPrenom: userET.NomPrenom,
-                image: userET.image,
-                Email: userET.Email,
-                Role: userET.Role
+                id: user._id,
+                NomPrenom: user.NomPrenom,
+                image: user.image,
+                Email: user.Email,
+                Role: user.Role
             }
-            tokenE = jwt.sign(payload, userET.Mot_De_Pass, { expiresIn: "1h" });
+            tokenE = jwt.sign(payload, user.Mot_De_Pass, { expiresIn: "1h" });
             res.status(200).send({ MyToken: tokenE })
         }
     }
@@ -136,5 +137,5 @@ router_Etudiant.post("/login", async (req, res) => {
 
 
 
-router_Etudiant.delete("/Supprimer", (req, res) => { });
-module.exports = router_Etudiant;
+router_Enseignant.delete("/Supprimer", (req, res) => { });
+module.exports = router_Enseignant;
