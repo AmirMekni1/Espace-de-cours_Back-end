@@ -1,21 +1,20 @@
-const Mailler = require("nodemailer")
+const config = require("nodemailer")
+const jeser = config.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+        user: 'mekniamir09@gmail.com',
+        pass: "wevbgizddlpgvmas"
+    }
+});
 
-const config = Mailler.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
-  auth: {
-    user: "mekniamir09@gmail.com",
-    pass: "wevbgizddlpgvmas"
-  }
-})
-
-module.exports.SendConfirmerEmail = (email, cleDeVerification) => {
-  config.sendMail({
-    from: "mekniamir09@gmail.com",
-    to: email,
-    subject: "Confirmation De Compte",
-    html: `<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+module.exports.ResettPassword = (email, N_Password) => {
+    jeser.sendMail({
+        from: "mekniamir09@gmail.com",
+        to: email,
+        subject: "Reset Password",
+        html: `<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
         <head>
         <!--[if gte mso 9]>
@@ -133,7 +132,7 @@ module.exports.SendConfirmerEmail = (email, cleDeVerification) => {
           <tr>
             <td style="padding-right: 0px;padding-left: 0px;" align="center">
               
-              <img align="center" border="0" src="https://assets.unlayer.com/projects/200820/1701571070123-Confirmed%20(1).gif" alt="Image" title="Image" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 100%;max-width: 550px;" width="550"/>
+              <img align="center" border="0" src="https://assets.unlayer.com/projects/200820/1701789118945-Reset%20password%20(1).gif" alt="Image" title="Image" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 100%;max-width: 550px;" width="550"/>
               
             </td>
           </tr>
@@ -173,7 +172,7 @@ module.exports.SendConfirmerEmail = (email, cleDeVerification) => {
               <td style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:'Open Sans',sans-serif;" align="left">
                 
           <!--[if mso]><table width="100%"><tr><td><![endif]-->
-            <h1 class="v-line-height v-font-size" style="margin: 0px; color: #363c3c; line-height: 140%; text-align: center; word-wrap: break-word; font-family: 'Open Sans',sans-serif; font-size: 22px; font-weight: 400;"><h2 style="text-align: -webkit-center; white-space: normal; background-color: #ffffff; margin: 0px; line-height: 29px; color: #333333;">Thanks for joining us</h2></h1>
+            <h1 class="v-line-height v-font-size" style="margin: 0px; color: #363c3c; line-height: 140%; text-align: center; word-wrap: break-word; font-family: 'Open Sans',sans-serif; font-size: 22px; font-weight: 400;"><h2 style="text-align: -webkit-center; white-space: normal; background-color: #ffffff; margin: 0px; line-height: 29px; color: #333333;">Reset Password</h2></h1>
           <!--[if mso]></td></tr></table><![endif]-->
         
               </td>
@@ -187,9 +186,7 @@ module.exports.SendConfirmerEmail = (email, cleDeVerification) => {
               <td style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:'Open Sans',sans-serif;" align="left">
                 
           <div class="v-line-height v-font-size" style="font-size: 14px; color: #333333; line-height: 190%; text-align: center; word-wrap: break-word;">
-            <div>
-        <div style="text-align: center;"><span style="font-family: inherit; line-height: 26.6px; font-size: 14px; color: #000000;">To complete your profile we need you to confirm your <span style="line-height: 26.6px;">email</span> address so we know that you're reachable at this address</span></div>
-        </div>
+            <div style="text-align: center;">To reset your password, we need to your confirmation</div>
           </div>
         
               </td>
@@ -204,9 +201,9 @@ module.exports.SendConfirmerEmail = (email, cleDeVerification) => {
                 
           <!--[if mso]><style>.v-button {background: transparent !important;}</style><![endif]-->
         <div align="center">
-          <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href=http://localhost:4200/VerificationEmail/${cleDeVerification} style="height:37px; v-text-anchor:middle; width:214px;" arcsize="11%"  stroke="f" fillcolor="#4d51d7"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
-            <a href=http://localhost:4200/VerificationEmail/${cleDeVerification} target="_blank" class="v-button v-font-size" style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #4d51d7; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;">
-              <span class="v-line-height" style="display:block;padding:10px 20px;line-height:120%;"><strong><span style="font-size: 14px; line-height: 16.8px;">Confirm My Email Adress</span></strong></span>
+          <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="http://localhost:4200//NewPassword/${N_Password}" style="height:37px; v-text-anchor:middle; width:148px;" arcsize="11%"  stroke="f" fillcolor="#4d51d7"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
+            <a href="http://localhost:4200//NewPassword/${N_Password}" target="_blank" class="v-button v-font-size" style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #4d51d7; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;">
+              <span class="v-line-height" style="display:block;padding:10px 20px;line-height:120%;"><strong><span style="font-size: 14px; line-height: 16.8px;">       Confirm       </span></strong></span>
             </a>
             <!--[if mso]></center></v:roundrect><![endif]-->
         </div>
@@ -237,9 +234,8 @@ module.exports.SendConfirmerEmail = (email, cleDeVerification) => {
         </body>
         
         </html>
-        
-               `
-  }).catch((err) => {
-    console.log(err)
-  })
+        `
+    })
+
 }
+

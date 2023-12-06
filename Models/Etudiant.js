@@ -7,7 +7,8 @@ const EtudiantModel = mongo.model("Etudiant",{
     Verification  :     {type : String , default : false},
     Role          :     {type : String},
     image         :     {type : String},
-    CDCE          :     {type : String}
+    CDCE          :     {type : String},
+    RESET         :     {type : String , default : ""}
 
 });
 

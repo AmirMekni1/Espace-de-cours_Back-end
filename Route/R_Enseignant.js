@@ -5,6 +5,7 @@ const mult = require("multer");
 const cryptage = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { SendConfirmerEmail } = require('../SocialMedia/BoiteGmail');
+const { ResettPassword } = require('../SocialMedia/ResetPassword');
 const LocalStorage = require('node-localstorage').LocalStorage;
 const localStorage = new LocalStorage('./scratch');
 
@@ -73,25 +74,25 @@ router_Enseignant.post("/InscriptionEnseignant", upload.any('img'), (req, res) =
 
 router_Enseignant.post("/login", async (req, res) => {
     data = req.body;
-const userEn = await N_Enseignant.findOne({ Email: data.Email })
-if (!userEn) {
-    res.status(401).send("Email Icorrect");
-} else {
-    verifPass = cryptage.compareSync(data.Mot_De_Pass, userEn.Mot_De_Pass);
-    if (!verifPass) {
-        res.status(402).send("Password Icorrect");
-    } else if (userEn.Verification == "true") {
-        payload = {
-            id: userEn._id,
-            NomPrenom: userEn.NomPrenom,
-            image: userEn.image,
-            Email: userEn.Email,
-            Role: userEn.Role
+    const userEn = await N_Enseignant.findOne({ Email: data.Email })
+    if (!userEn) {
+        res.status(401).send("Email Icorrect");
+    } else {
+        verifPass = cryptage.compareSync(data.Mot_De_Pass, userEn.Mot_De_Pass);
+        if (!verifPass) {
+            res.status(402).send("Password Icorrect");
+        } else if (userEn.Verification == "true") {
+            payload = {
+                id: userEn._id,
+                NomPrenom: userEn.NomPrenom,
+                image: userEn.image,
+                Email: userEn.Email,
+                Role: userEn.Role
+            }
+            tokenE = jwt.sign(payload, userEn.Mot_De_Pass, { expiresIn: "1h" });
+            res.status(200).send({ MyToken: tokenE })
         }
-        tokenE = jwt.sign(payload, userEn.Mot_De_Pass, { expiresIn: "1h" });
-        res.status(200).send({ MyToken: tokenE })
     }
-}
 })
 //___________________________________________________________________________________________________________________________________________________________________________
 
@@ -107,32 +108,48 @@ router_Enseignant.get("/Lister", VerifierToken, (req, res) => {
 //___________________________________________________________________________________________________________________________________________________________________________
 
 
-router_Enseignant.post("/login", (req, res) => {
-    data = req.body;
-    user = N_Enseignant.findOne({ Email: data.Email })
-    if (!user) {
-        res.status(401).send("Email Icorrect");
+//___________________________________________________________________________________________________________________________________________________________________________
+
+router_Enseignant.post("/verifierEmail/:id", async (req, res) => {
+    const cle = req.params.id
+    const ok = await N_Enseignant.findOne({ CDCE: cle })
+    if (ok) {
+        ok.Verification = "true"
+        ok.save()
+        res.send('En')
     } else {
-        verifPass = cryptage.compareSync(data.Mot_De_Pass, user.Mot_De_Pass);
-        if (!verifPass) {
-            res.status(402).send("Password Icorrect");
-        } else if (user.Verification == "true") {
-            payload = {
-                id: user._id,
-                NomPrenom: user.NomPrenom,
-                image: user.image,
-                Email: user.Email,
-                Role: user.Role
-            }
-            tokenE = jwt.sign(payload, user.Mot_De_Pass, { expiresIn: "1h" });
-            res.status(200).send({ MyToken: tokenE })
-        }
+        res.send('erreur')
     }
-});
+})
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
+router_Enseignant.post("/sendResetPassword", async (req, res) => {
+    const ox = await N_Enseignant.findOne({ Email: req.body.Email })
+    if (ox) {
+        const chaine = require("crypto").randomBytes(60).toString("hex")
+        ox.RESET = chaine
+        ox.save()
+        ResettPassword(ox.Email, chaine)
+        res.status(200).send({ MyTokenn: "ok" })
+    } else {
+        res.status(401).send({ msg: "not found" })
 
+    }
+})
+
+router_Enseignant.post("/NewPassword/:id", async (req, res) => {
+    const code = req.params.id
+    const data = req.body;
+    const REET = await N_Enseignant.findOne({ RESET: code })
+    if (REET) {
+        const salt = cryptage.genSaltSync(10)
+        const password = cryptage.hashSync(data.Mot_De_Pass, salt)
+        REET.Mot_De_Pass = password
+        REET.save()
+        res.status(200).send({ MyTokenn: "ok" })
+    }
+})
 
 
 

@@ -7,7 +7,8 @@ const EnseignantModel = mongo.model("Enseignant",{
     Verification  :     {type : String , default : false},
     Role          :     {type : String},
     image         :     {type : String},
-    CDCE          :     {type : String}
+    CDCE          :     {type : String},
+    RESET         :     {type : String , default : ""}
 
 });
 module.exports = EnseignantModel;

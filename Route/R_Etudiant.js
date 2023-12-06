@@ -5,9 +5,10 @@ const mult = require("multer");
 const cryptage = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { SendConfirmerEmail } = require('../SocialMedia/BoiteGmail');
+const { ResettPassword } = require('../SocialMedia/ResetPassword');
 const LocalStorage = require('node-localstorage').LocalStorage;
 const localStorage = new LocalStorage('./scratch');
-
+const alert = require("alert")
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
@@ -74,24 +75,15 @@ router_Etudiant.post("/InscriptionEtudiant", upload.any('img'), (req, res) => {
 
 router_Etudiant.post("/verifierEmail/:id", async (req, res) => {
     const cle = req.params.id
-    N_Etudiant.findOne({ CDCE: cle }).then((ok) => {
-        if (ok) {
-            ok.Verification = "true"
-            ok.save()
-            res.send('Etu')
-        } 
-    }).catch(()=>
-    {
-        N_Enseignant.findOne({ CDCE: cle }).then((ox) => {
-            if (ox) {
-                ox.Verification = "true"
-                ox.save()
-                res.send('Ens')
-            }
-        })
-    })
+    const ok = await N_Etudiant.findOne({ CDCE: cle })
+    if (ok) {
+        ok.Verification = "true"
+        ok.save()
+        res.send('Etu')
+    } else {
+        res.send('erreur')
+    }
 })
-
 //___________________________________________________________________________________________________________________________________________________________________________
 
 
@@ -105,29 +97,29 @@ router_Etudiant.get("/Lister", VerifierToken, (req, res) => {
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
-
 router_Etudiant.post("/login", async (req, res) => {
     data = req.body;
-    const userET = await N_Etudiant.findOne({ Email: data.Email })
-    if (!userET) {
+    const userEn = await N_Etudiant.findOne({ Email: data.Email })
+    if (!userEn) {
         res.status(401).send("Email Icorrect");
     } else {
-        verifPass = cryptage.compareSync(data.Mot_De_Pass, userET.Mot_De_Pass);
+        verifPass = cryptage.compareSync(data.Mot_De_Pass, userEn.Mot_De_Pass);
         if (!verifPass) {
             res.status(402).send("Password Icorrect");
-        } else if (userET.Verification == "true") {
+        } else if (userEn.Verification == "true") {
             payload = {
-                id: userET._id,
-                NomPrenom: userET.NomPrenom,
-                image: userET.image,
-                Email: userET.Email,
-                Role: userET.Role
+                id: userEn._id,
+                NomPrenom: userEn.NomPrenom,
+                image: userEn.image,
+                Email: userEn.Email,
+                Role: userEn.Role
             }
-            tokenE = jwt.sign(payload, userET.Mot_De_Pass, { expiresIn: "1h" });
+            tokenE = jwt.sign(payload, userEn.Mot_De_Pass, { expiresIn: "1h" });
             res.status(200).send({ MyToken: tokenE })
         }
     }
-});
+})
+
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
@@ -136,5 +128,32 @@ router_Etudiant.post("/login", async (req, res) => {
 
 
 
-router_Etudiant.delete("/Supprimer", (req, res) => { });
+router_Etudiant.post("/sendResetPassword", async (req, res) => {
+    const ok = await N_Etudiant.findOne({ Email: req.body.Email })
+    if (ok) {
+        const chaine = require("crypto").randomBytes(60).toString("hex")
+
+        ok.RESET = chaine
+        ok.save()
+        ResettPassword(ok.Email, chaine)
+        res.status(200).send({ MyTokenn: "ok" })
+    } else ((err) => {
+        res.status(401).send({ msg: err })
+    })
+})
+
+
+router_Etudiant.post("/NewPassword/:id", async (req, res) => {
+     code = req.params.id
+     
+    const REET = await N_Etudiant.findOne({ RESET: code })
+    if (REET) {
+        
+        REET.Mot_De_Pass = req.body.Mot_De_Pass
+        REET.save()
+        res.status(200).send({ MyTokenn: "ok" })
+    } else {
+        res.status(200).send({ MyTokenn: "erreur" })
+    }
+})
 module.exports = router_Etudiant;
