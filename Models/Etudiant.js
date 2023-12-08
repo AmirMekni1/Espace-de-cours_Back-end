@@ -8,7 +8,8 @@ const EtudiantModel = mongo.model("Etudiant",{
     Role          :     {type : String},
     image         :     {type : String},
     CDCE          :     {type : String},
-    RESET         :     {type : String , default : ""}
+    RESET         :     {type : String , default : ""},
+    RESET_EXP     :      {type : String}
 
 });
 

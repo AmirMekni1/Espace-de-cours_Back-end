@@ -8,7 +8,7 @@ const { SendConfirmerEmail } = require('../SocialMedia/BoiteGmail');
 const { ResettPassword } = require('../SocialMedia/ResetPassword');
 const LocalStorage = require('node-localstorage').LocalStorage;
 const localStorage = new LocalStorage('./scratch');
-
+const Matiere = require("../Models/Matiere")
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
@@ -57,9 +57,12 @@ router_Enseignant.post("/InscriptionEnseignant", upload.any('img'), (req, res) =
     passwordCrypter = cryptage.hashSync(data.Mot_De_Pass, cle);
     data.Mot_De_Pass = passwordCrypter;
     po = new N_Enseignant(data);
+    M = new Matiere(data.Email)
     po.image = photoname;
     po.CDCE = resultat
+    po.RESET_EXP = Date.now() + 360000
     po.save().then(() => {
+        M.save()
         photoname = "";
         res.status(200).send({ msg: data });
         SendConfirmerEmail(data.Email, resultat)
@@ -74,7 +77,7 @@ router_Enseignant.post("/InscriptionEnseignant", upload.any('img'), (req, res) =
 
 router_Enseignant.post("/login", async (req, res) => {
     data = req.body;
-    const userEn = await N_Enseignant.findOne({ Email: data.Email })
+    const userEn = await N_Enseignant.findOne({ Email: data.Email , RESET_EXP : {$gt : Date.now() }})
     if (!userEn) {
         res.status(401).send("Email Icorrect");
     } else {
