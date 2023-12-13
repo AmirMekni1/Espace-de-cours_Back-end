@@ -57,10 +57,11 @@ router_Enseignant.post("/InscriptionEnseignant", upload.any('img'), (req, res) =
     passwordCrypter = cryptage.hashSync(data.Mot_De_Pass, cle);
     data.Mot_De_Pass = passwordCrypter;
     po = new N_Enseignant(data);
-    M = new Matiere(data.Email)
+    M = new Matiere()
+    M.Email = data.Email
     po.image = photoname;
     po.CDCE = resultat
-    po.RESET_EXP = Date.now() + 360000
+    po.RESET_EXP = Date.now()
     po.save().then(() => {
         M.save()
         photoname = "";
@@ -77,7 +78,7 @@ router_Enseignant.post("/InscriptionEnseignant", upload.any('img'), (req, res) =
 
 router_Enseignant.post("/login", async (req, res) => {
     data = req.body;
-    const userEn = await N_Enseignant.findOne({ Email: data.Email , RESET_EXP : {$gt : Date.now() }})
+    const userEn = await N_Enseignant.findOne({ Email: data.Email })
     if (!userEn) {
         res.status(401).send("Email Icorrect");
     } else {
@@ -127,13 +128,15 @@ router_Enseignant.post("/verifierEmail/:id", async (req, res) => {
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
-router_Enseignant.post("/sendResetPassword", async (req, res) => {
-    const ox = await N_Enseignant.findOne({ Email: req.body.Email })
+router_Enseignant.post("/ResetPassword", async (req, res) => {
+    data = req.body.texte
+    const ox = await N_Enseignant.findOne({ Email: data })
     if (ox) {
         const chaine = require("crypto").randomBytes(60).toString("hex")
         ox.RESET = chaine
-        ox.save()
         ResettPassword(ox.Email, chaine)
+        ox.RESET_EXP = Date.now() + 3600000
+        ox.save()
         res.status(200).send({ MyTokenn: "ok" })
     } else {
         res.status(401).send({ msg: "not found" })
@@ -141,18 +144,27 @@ router_Enseignant.post("/sendResetPassword", async (req, res) => {
     }
 })
 
+
+//___________________________________________________________________________________________________________________________________________________________________________
+
+
 router_Enseignant.post("/NewPassword/:id", async (req, res) => {
     const code = req.params.id
-    const data = req.body;
-    const REET = await N_Enseignant.findOne({ RESET: code })
+    const data = req.body.texte;
+    const REET = await N_Enseignant.findOne({ RESET: code, RESET_EXP: { $gt: Date.now() } })
     if (REET) {
         const salt = cryptage.genSaltSync(10)
-        const password = cryptage.hashSync(data.Mot_De_Pass, salt)
+        const password = cryptage.hashSync(data, salt)
         REET.Mot_De_Pass = password
         REET.save()
         res.status(200).send({ MyTokenn: "ok" })
     }
 })
+
+
+//___________________________________________________________________________________________________________________________________________________________________________
+
+
 
 
 

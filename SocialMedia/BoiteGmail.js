@@ -6,7 +6,7 @@ const config = Mailler.createTransport({
   secure: true,
   auth: {
     user: "mekniamir09@gmail.com",
-    pass: "wevbgizddlpgvmas"
+    pass: "yzuppymofakwkhko"
   }
 })
 

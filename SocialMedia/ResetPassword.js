@@ -5,7 +5,7 @@ const jeser = config.createTransport({
     secure: true,
     auth: {
         user: 'mekniamir09@gmail.com',
-        pass: "wevbgizddlpgvmas"
+        pass: "yzuppymofakwkhko"
     }
 });
 

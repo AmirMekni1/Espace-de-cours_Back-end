@@ -59,6 +59,7 @@ router_Etudiant.post("/InscriptionEtudiant", upload.any('img'), (req, res) => {
     po = new N_Etudiant(data);
     po.image = photoname;
     po.CDCE = resultat
+    po.RESET_EXP = Date.now()
     po.save().then(() => {
         photoname = "";
         res.status(200).send({ msg: data });
@@ -125,35 +126,41 @@ router_Etudiant.post("/login", async (req, res) => {
 
 
 
-
-
-
-router_Etudiant.post("/sendResetPassword", async (req, res) => {
-    const ok = await N_Etudiant.findOne({ Email: req.body.Email })
-    if (ok) {
+router_Etudiant.post("/ResetPassword", async (req, res) => {
+    data = req.body.texte;
+    const ox = await N_Etudiant.findOne({ Email: data })
+    if (ox) {
         const chaine = require("crypto").randomBytes(60).toString("hex")
-
-        ok.RESET = chaine
-        ok.save()
-        ResettPassword(ok.Email, chaine)
+        ox.RESET = chaine
+        ResettPassword(ox.Email, chaine)
+        ox.RESET_EXP = Date.now() + 3600000
+        ox.save()
         res.status(200).send({ MyTokenn: "ok" })
-    } else ((err) => {
-        res.status(401).send({ msg: err })
-    })
+    } else {
+        res.status(401).send({ msg: "not found" })
+    }
 })
+   
+
+//___________________________________________________________________________________________________________________________________________________________________________
+
 
 
 router_Etudiant.post("/NewPassword/:id", async (req, res) => {
-     code = req.params.id
-     
-    const REET = await N_Etudiant.findOne({ RESET: code })
+    const code = req.params.id
+    const data = req.body.texte;
+    const REET = await N_Etudiant.findOne({ RESET: code , RESET_EXP : {$gt : Date.now() }  })
     if (REET) {
-        
-        REET.Mot_De_Pass = req.body.Mot_De_Pass
+        const salt = cryptage.genSaltSync(10)
+        const password = cryptage.hashSync(data, salt)
+        REET.Mot_De_Pass = password
         REET.save()
         res.status(200).send({ MyTokenn: "ok" })
-    } else {
-        res.status(200).send({ MyTokenn: "erreur" })
     }
 })
+
+
+//___________________________________________________________________________________________________________________________________________________________________________
+
+
 module.exports = router_Etudiant;

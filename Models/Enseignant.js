@@ -10,7 +10,7 @@ const EnseignantModel = mongo.model("Enseignant",{
     image         :     {type : String},
     CDCE          :     {type : String},
     RESET         :     {type : String , default : ""},
-    RESET_EXP     :     {type : String}
-  
+    RESET_EXP     :     {type : Date},
+   
 });
 module.exports = EnseignantModel;
