@@ -144,8 +144,6 @@ router_Etudiant.post("/ResetPassword", async (req, res) => {
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
-
-
 router_Etudiant.post("/NewPassword/:id", async (req, res) => {
     const code = req.params.id
     const data = req.body.texte;
