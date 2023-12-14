@@ -150,7 +150,7 @@ router_Enseignant.post("/ResetPassword", async (req, res) => {
 
 router_Enseignant.post("/NewPassword/:id", async (req, res) => {
     const code = req.params.id
-    const data = req.body.texte;
+    const data = req.body.PWD;
     const REET = await N_Enseignant.findOne({ RESET: code, RESET_EXP: { $gt: Date.now() } })
     if (REET) {
         const salt = cryptage.genSaltSync(10)
@@ -164,10 +164,14 @@ router_Enseignant.post("/NewPassword/:id", async (req, res) => {
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
+router_Enseignant.post("/EE/:id", async (req, res) => {
+    const code = req.params.id
+    const REET = await N_Enseignant.findOne({ RESET: code })
+    if (REET) {
+        res.status(200).send({ MyTokenn: "true" })
+    }else{
+        res.status(500).send({ MyTokenn: "false" })
+    }
+})
 
-
-
-
-
-router_Enseignant.delete("/Supprimer", (req, res) => { });
 module.exports = router_Enseignant;

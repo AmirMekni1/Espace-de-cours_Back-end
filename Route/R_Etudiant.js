@@ -147,15 +147,20 @@ router_Etudiant.post("/ResetPassword", async (req, res) => {
 router_Etudiant.post("/NewPassword/:id", async (req, res) => {
     const code = req.params.id
     const data = req.body.texte;
-    const REET = await N_Etudiant.findOne({ RESET: code , RESET_EXP : {$gt : Date.now() }  })
-    if (REET) {
-        const salt = cryptage.genSaltSync(10)
-        const password = cryptage.hashSync(data, salt)
-        REET.Mot_De_Pass = password
-        REET.save()
-        res.status(200).send({ MyTokenn: "ok" })
+        const REEN = await N_Etudiant.findOne({ RESET: code , RESET_EXP : {$gt : Date.now() }  })
+        if (REEN) {
+            const salt = cryptage.genSaltSync(10)
+            const password = cryptage.hashSync(data, salt)
+            REEN.Mot_De_Pass = password
+            REEN.save()
+            res.status(200).send({ MyTokenn: "ok" })
+        }
     }
-})
+)
+
+
+
+//___________________________________________________________________________________________________________________________________________________________________________
 
 
 //___________________________________________________________________________________________________________________________________________________________________________
