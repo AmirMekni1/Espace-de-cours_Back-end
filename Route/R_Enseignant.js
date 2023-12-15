@@ -9,6 +9,8 @@ const { ResettPassword } = require('../SocialMedia/ResetPassword');
 const LocalStorage = require('node-localstorage').LocalStorage;
 const localStorage = new LocalStorage('./scratch');
 const Matiere = require("../Models/Matiere")
+const session = require('express-session');
+const { model } = require('mongoose');
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
@@ -32,18 +34,20 @@ const upload = mult({ storage: mystorge });
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
-
 VerifierToken = (req, res, next) => {
-    let token = req.headers.authorization;
+    let token = req.session.MyToken;
+    console.log(token)
     if (!token) {
         res.send(" Acces rejected  !!! Bara ched darkom ")
     } try {
-        jwt.verify(token, user.Mot_De_Pass);
+        jwt.verify(token, "24884920");
         next();
     } catch (error) {
         res.status(500).send(error)
     }
 }
+
+
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
@@ -93,7 +97,9 @@ router_Enseignant.post("/login", async (req, res) => {
                 Email: userEn.Email,
                 Role: userEn.Role
             }
-            tokenE = jwt.sign(payload, userEn.Mot_De_Pass, { expiresIn: "1h" });
+            tokenE = jwt.sign(payload,"24884920", { expiresIn: "1h" });
+            req.session.MyToken=tokenE
+            console.log(req.session.MyToken)
             res.status(200).send({ MyToken: tokenE })
         }
     }

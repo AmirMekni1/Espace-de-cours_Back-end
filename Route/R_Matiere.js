@@ -2,6 +2,8 @@ const exp = require('express');
 const router_Matiere =exp.Router();
 const mult = require("multer");
 const Matiere = require("../Models/Matiere")
+const https = require('https');
+const jwt = require("jsonwebtoken");
 
 //______________________________________________________________________________________________________________________________________________
 
@@ -18,14 +20,30 @@ const mystorge = mult.diskStorage({
     }
 });
 
+
+
+
 //______________________________________________________________________________________________________________________________________________
 
+function authenticateToken(req, res, next) {
+    const token = req.header('Authorization');
+    if (!token) {
+      return res.status(401).json({ message: 'Token manquant' });
+    }
+    jwt.verify(token, "24884920", (err, user) => {
+      if (err) {
+        return res.status(403).json({ message: 'Acces rejected  !!!' });
+      }
+  
+      next();
+    });
+  }
 
 const upload = mult({ storage: mystorge });
 
 //______________________________________________________________________________________________________________________________________________
 //ajouter matiere
-router_Matiere.post("/ajouterMatiere", upload.any('img'),  (req, res) => {
+router_Matiere.post("/ajouterMatiere", upload.any('img'),authenticateToken,  (req, res) => {
     const data = req.body;
     const matiere = new Matiere(data);
     matiere.image=photoname;
@@ -41,7 +59,7 @@ router_Matiere.post("/ajouterMatiere", upload.any('img'),  (req, res) => {
 
 
 //lister matieres
-router_Matiere.get("/Lister", VerifierToken, (req, res) => {
+router_Matiere.get("/Lister", (req, res) => {
     Matiere.find().then((result) => {
         res.send(result);
     }).catch(() => {
@@ -50,9 +68,9 @@ router_Matiere.get("/Lister", VerifierToken, (req, res) => {
 });
 
 //______________________________________________________________________________________________________________________________________________
-    router_Matiere.get("/GetAllCardMatiere/:id", async (req, res) => {
+    router_Matiere.get("/GetAllCardMatiere/:id",authenticateToken, async (req, res) => {
         
-           await Matiere.find({Email : req.params.id }).then((d)=>{
+           await Matiere.find({Email : req.params.id}).then((d)=>{
             res.status(200).send(d)
            }).catch((e)=>{
             res.status(500).send(e)
@@ -62,12 +80,13 @@ router_Matiere.get("/Lister", VerifierToken, (req, res) => {
 
 //______________________________________________________________________________________________________________________________________________
 
-router_Matiere.delete("/deleteMatiere/:id", async (req,res)=>{
-await Matiere.findOneAndDelete({Email : req.params.id }).then(()=>{
+router_Matiere.delete("/deleteMatiere/:id/:photo", async (req,res)=>{
+const x = await Matiere.findOneAndDelete({Email : req.params.id, image : req.params.photo })
+if(x){
     res.status(200).send({Message : "ok"})
-}).catch((er)=>{
-    res.status(500).send({Message : er})
-})
+}else{
+    res.status(500).send({Message : "erreur"})
+}
 })
 //______________________________________________________________________________________________________________________________________________
 //______________________________________________________________________________________________________________________________________________

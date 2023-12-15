@@ -9,6 +9,7 @@ const { ResettPassword } = require('../SocialMedia/ResetPassword');
 const LocalStorage = require('node-localstorage').LocalStorage;
 const localStorage = new LocalStorage('./scratch');
 const alert = require("alert")
+const session = require('express-session');
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
@@ -34,9 +35,10 @@ const upload = mult({ storage: mystorge });
 
 
 VerifierToken = (req, res, next) => {
-    let token = req.headers.authorization;
+    let token = req.headers('Authorization');
+    console.log(token)
     if (!token) {
-        res.send(" Acces rejected  !!! Bara ched darkom ")
+        res.send("  Bara ched darkom ")
     } try {
         jwt.verify(token, user.Mot_De_Pass);
         next();
@@ -115,7 +117,9 @@ router_Etudiant.post("/login", async (req, res) => {
                 Email: userEn.Email,
                 Role: userEn.Role
             }
-            tokenE = jwt.sign(payload, userEn.Mot_De_Pass, { expiresIn: "1h" });
+            tokenE = jwt.sign(payload,"24884920", { expiresIn: "1h" });
+            req.session.MyToken=tokenE
+            console.log(req.session.MyToken)
             res.status(200).send({ MyToken: tokenE })
         }
     }
