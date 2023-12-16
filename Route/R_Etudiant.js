@@ -33,19 +33,18 @@ const upload = mult({ storage: mystorge });
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
-
-VerifierToken = (req, res, next) => {
-    let token = req.headers('Authorization');
-    console.log(token)
+function authenticateToken(req, res, next) {
+    const token = req.header('Authorization');
     if (!token) {
-        res.send("  Bara ched darkom ")
-    } try {
-        jwt.verify(token, user.Mot_De_Pass);
-        next();
-    } catch (error) {
-        res.status(500).send(error)
+      return res.status(401).json({ message: 'Token manquant' });
     }
-}
+    jwt.verify(token, "24884920", (err, user) => {
+      if (err) {
+        return res.status(403).json({ message: 'Acces rejected  !!!' });
+      }
+      next();
+    });
+  }
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
@@ -90,7 +89,7 @@ router_Etudiant.post("/verifierEmail/:id", async (req, res) => {
 //___________________________________________________________________________________________________________________________________________________________________________
 
 
-router_Etudiant.get("/Lister", VerifierToken, (req, res) => {
+router_Etudiant.get("/Lister", authenticateToken, (req, res) => {
     N_Etudiant.find().then((result) => {
         res.send(result);
     }).catch(() => {

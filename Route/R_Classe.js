@@ -1,17 +1,24 @@
 const exp = require('express');
-const router_Matiere =exp.Router();
+const router_Classe =exp.Router();
 const mult = require("multer");
-const Matiere = require("../Models/Matiere")
+const Classe = require("../Models/Classe")
 const https = require('https');
 const jwt = require("jsonwebtoken");
 
+
 //______________________________________________________________________________________________________________________________________________
+
+
+
+
+//______________________________________________________________________________________________________________________________________________
+
 
 //recuperer image
 
 photoname = "";
 const mystorge = mult.diskStorage({
-    destination: './ImagesMatiere',
+    destination: './ImagesClasse',
     filename: (req, photo, redirect) => {
         L_date = Date.now();
         let f1 = L_date + "." + photo.mimetype.split('/')[1];
@@ -40,12 +47,12 @@ function authenticateToken(req, res, next) {
 const upload = mult({ storage: mystorge });
 
 //______________________________________________________________________________________________________________________________________________
-//ajouter matiere
-router_Matiere.post("/ajouterMatiere", upload.any('img'),authenticateToken,  (req, res) => {
+//ajouter Classe
+router_Classe.post("/ajouterClasse", upload.any('img'),authenticateToken,  (req, res) => {
     const data = req.body;
-    const matiere = new Matiere(data);
-    matiere.image=photoname;
-    matiere.save().then(()=>{
+    const po = new Classe(data);
+    po.image=photoname;
+    po.save().then(()=>{
         res.send("ok");
     }).catch(()=>{
         res.send("erreur");
@@ -56,9 +63,9 @@ router_Matiere.post("/ajouterMatiere", upload.any('img'),authenticateToken,  (re
 //______________________________________________________________________________________________________________________________________________
 
 
-//lister matieres
-router_Matiere.get("/Lister", (req, res) => {
-    Matiere.find().then((result) => {
+//lister Classes
+router_Classe.get("/Lister", (req, res) => {
+    Classe.find().then((result) => {
         res.send(result);
     }).catch(() => {
         res.send('error');
@@ -66,9 +73,9 @@ router_Matiere.get("/Lister", (req, res) => {
 });
 
 //______________________________________________________________________________________________________________________________________________
-    router_Matiere.get("/GetAllCardMatiere/:id",authenticateToken, async (req, res) => {
+    router_Classe.get("/GetAllCardClasse/:id",authenticateToken, async (req, res) => {
         
-           await Matiere.find({Email : req.params.id}).then((d)=>{
+           await Classe.find({Email : req.params.id}).then((d)=>{
             res.status(200).send(d)
            }).catch((e)=>{
             res.status(500).send(e)
@@ -78,8 +85,8 @@ router_Matiere.get("/Lister", (req, res) => {
 
 //______________________________________________________________________________________________________________________________________________
 
-router_Matiere.delete("/deleteMatiere/:id/:photo",authenticateToken, async (req,res)=>{
-const x = await Matiere.findOneAndDelete({Email : req.params.id, image : req.params.photo })
+router_Classe.delete("/deleteClasse/:id/:photo",authenticateToken, async (req,res)=>{
+const x = await Classe.findOneAndDelete({Email : req.params.id, image : req.params.photo })
 if(x){
     res.status(200).send({Message : "ok"})
 }else{
@@ -108,4 +115,4 @@ if(x){
 //______________________________________________________________________________________________________________________________________________
 //______________________________________________________________________________________________________________________________________________
 
-module.exports = router_Matiere;
+module.exports = router_Classe;

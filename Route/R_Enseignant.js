@@ -34,19 +34,19 @@ const upload = mult({ storage: mystorge });
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
-VerifierToken = (req, res, next) => {
-    let token = req.session.MyToken;
-    console.log(token)
+function authenticateToken(req, res, next) {
+    const token = req.header('Authorization');
     if (!token) {
-        res.send(" Acces rejected  !!! Bara ched darkom ")
-    } try {
-        jwt.verify(token, "24884920");
-        next();
-    } catch (error) {
-        res.status(500).send(error)
+      return res.status(401).json({ message: 'Token manquant' });
     }
-}
-
+    jwt.verify(token, "24884920", (err, user) => {
+      if (err) {
+        return res.status(403).json({ message: 'Acces rejected  !!!' });
+      }
+  
+      next();
+    });
+  }
 
 
 //___________________________________________________________________________________________________________________________________________________________________________
@@ -99,7 +99,6 @@ router_Enseignant.post("/login", async (req, res) => {
             }
             tokenE = jwt.sign(payload,"24884920", { expiresIn: "1h" });
             req.session.MyToken=tokenE
-            console.log(req.session.MyToken)
             res.status(200).send({ MyToken: tokenE })
         }
     }
@@ -107,7 +106,7 @@ router_Enseignant.post("/login", async (req, res) => {
 //___________________________________________________________________________________________________________________________________________________________________________
 
 
-router_Enseignant.get("/Lister", VerifierToken, (req, res) => {
+router_Enseignant.get("/Lister", authenticateToken, (req, res) => {
     N_Enseignant.find().then((result) => {
         res.send(result);
     }).catch(() => {
