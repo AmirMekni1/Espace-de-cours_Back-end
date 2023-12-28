@@ -37,16 +37,16 @@ const upload = mult({ storage: mystorge });
 function authenticateToken(req, res, next) {
     const token = req.header('Authorization');
     if (!token) {
-      return res.status(401).json({ message: 'Token manquant' });
+        return res.status(401).json({ message: 'Token manquant' });
     }
     jwt.verify(token, "24884920", (err, user) => {
-      if (err) {
-        return res.status(403).json({ message: 'Acces rejected  !!!' });
-      }
-  
-      next();
+        if (err) {
+            return res.status(403).json({ message: 'Acces rejected  !!!' });
+        }
+
+        next();
     });
-  }
+}
 
 
 //___________________________________________________________________________________________________________________________________________________________________________
@@ -64,6 +64,11 @@ router_Enseignant.post("/InscriptionEnseignant", upload.any('img'), (req, res) =
     M = new Matiere()
     M.Email = data.Email
     po.image = photoname;
+    po.MédiasSociaux.SiteWeb    ="www.Exemple-SiteWeb.com"
+    po.MédiasSociaux.GitHub     ="www.Exemple-GitHub.com"
+    po.MédiasSociaux.Twitter    ="www.Exemple-Twitter.com"
+    po.MédiasSociaux.Instagram  ="www.Exemple-Instagram.com"
+    po.MédiasSociaux.Facebook   ="www.Exemple-Facebook.com"
     po.CDCE = resultat
     po.RESET_EXP = Date.now()
     po.save().then(() => {
@@ -95,10 +100,11 @@ router_Enseignant.post("/login", async (req, res) => {
                 NomPrenom: userEn.NomPrenom,
                 image: userEn.image,
                 Email: userEn.Email,
-                Role: userEn.Role
+                Role: userEn.Role,
+                Telephone : userEn.Telephone
             }
-            tokenE = jwt.sign(payload,"24884920", { expiresIn: "1h" });
-            req.session.MyToken=tokenE
+            tokenE = jwt.sign(payload, "24884920", { expiresIn: "1h" });
+            req.session.MyToken = tokenE
             res.status(200).send({ MyToken: tokenE })
         }
     }
@@ -106,11 +112,12 @@ router_Enseignant.post("/login", async (req, res) => {
 //___________________________________________________________________________________________________________________________________________________________________________
 
 
-router_Enseignant.get("/Lister", authenticateToken, (req, res) => {
-    N_Enseignant.find().then((result) => {
+router_Enseignant.get("/Lister/:id",authenticateToken, (req, res) => {
+    const id = req.params.id
+    N_Enseignant.findOne({_id:id}).then((result) => {
         res.send(result);
-    }).catch(() => {
-        res.send('error');
+    }).catch((err) => {
+        res.send(err);
     });
 });
 
@@ -170,13 +177,140 @@ router_Enseignant.post("/NewPassword/:id", async (req, res) => {
 //___________________________________________________________________________________________________________________________________________________________________________
 
 router_Enseignant.post("/EE/:id", async (req, res) => {
-    const code = req.params.id
+    const data = req.body.o
     const REET = await N_Enseignant.findOne({ RESET: code })
     if (REET) {
         res.status(200).send({ MyTokenn: "true" })
-    }else{
+    } else {
         res.status(500).send({ MyTokenn: "false" })
     }
 })
+
+
+//___________________________________________________________________________________________________________________________________________________________________________
+
+
+router_Enseignant.post("/AjouterMatiereEnseignant/:id", authenticateToken, async (req, res) => {
+    const identifiant = req.params.id
+    const data = req.body.o
+    const REET = await N_Enseignant.findByIdAndUpdate({ _id: identifiant }, { $push: { MatiereEn: data } })
+    if (REET) {
+        res.status(200).send({ MyTokenn: "true" })
+    } else {
+        res.status(500).send({ MyTokenn: "false" })
+    }
+})
+
+
+//___________________________________________________________________________________________________________________________________________________________________________
+
+router_Enseignant.get("/RecupererMatiereEnseignant/:id", authenticateToken, async (req, res) => {
+    const identifiant = req.params.id
+    const REET = await N_Enseignant.findOne({ _id: identifiant }, { MatiereEn: 1 })
+    if (REET) {
+        res.status(200).send(REET.MatiereEn)
+    } else {
+        res.status(500).send({ MyTokenn: "false" })
+    }
+})
+
+//___________________________________________________________________________________________________________________________________________________________________________
+
+
+
+router_Enseignant.put('/MiseAjourProfile',authenticateToken, async (req, res) => {
+  const identifiant = req.params.id;
+  const dat = req.body;
+  try {
+    const updatedEnseignant = await N_Enseignant.findByIdAndUpdate(
+      { _id: dat.id },
+      {
+        $set: {
+          'MédiasSociaux.SiteWeb'  : dat.SiteWeb,
+          'MédiasSociaux.GitHub'   : dat.GitHub,
+          'MédiasSociaux.Twitter'  : dat.Twitter,
+          'MédiasSociaux.Instagram': dat.Instagram,
+          'MédiasSociaux.Facebook' : dat.Facebook,
+           NomPrenom               : dat.NomPrenom,
+           Telephone               : dat.Telephone
+          // Ajoutez d'autres champs si nécessaire
+        },
+           
+      },
+      { new: true } 
+    );
+
+    if (updatedEnseignant) {
+      res.status(200).json({ MyTokenn: 'true', updatedEnseignant });
+    } else {
+      res.status(404).json({ MyTokenn: 'false', message: 'Enseignant non trouvé' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ MyTokenn: 'false', message: 'Erreur interne du serveur' });
+  }
+});
+
+//___________________________________________________________________________________________________________________________________________________________________________
+
+router_Enseignant.get("/GetAllMediasSociaux/:id",authenticateToken, async (req, res) => {
+    const enseignantId = req.params.id;
+
+    try {
+        const enseignant = await N_Enseignant.findOne( { _id: enseignantId });
+
+        if (!enseignant) {
+            return res.status(404).json({ message: 'Erreur' });
+        }
+
+        const mediasSociaux = enseignant.MédiasSociaux;
+        const myArray = Object.values(mediasSociaux);
+        res.status(200).send(myArray)
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error });
+    }
+});
+
+//___________________________________________________________________________________________________________________________________________________________________________
+
+router_Enseignant.delete('/SupprimerMatiereEnseignant/:id/:M',authenticateToken, async (req, res) => {
+    const enseignantId = req.params.id;
+    const enseignantMat = req.params.M;
+
+    try {
+        const result = await N_Enseignant.findByIdAndUpdate(
+            { _id: enseignantId },
+            { $pull: { MatiereEn: enseignantMat } }
+        );
+
+        if (result) {
+            res.status(200).json({ message: 'Matière supprimée avec succès' });
+        } else {
+            res.status(404).json({ message: 'Enseignant non trouvé' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Erreur lors de la suppression de la matière' });
+    }
+});
+
+
+//___________________________________________________________________________________________________________________________________________________________________________
+
+
+//___________________________________________________________________________________________________________________________________________________________________________
+
+
+//___________________________________________________________________________________________________________________________________________________________________________
+
+
+//___________________________________________________________________________________________________________________________________________________________________________
+
+
+//___________________________________________________________________________________________________________________________________________________________________________
+
+
+//___________________________________________________________________________________________________________________________________________________________________________
 
 module.exports = router_Enseignant;
