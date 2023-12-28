@@ -46,7 +46,7 @@ router_Matiere.post("/ajouterMatiere", upload.any('img'),authenticateToken,  (re
     const matiere = new Matiere(data);
     matiere.image=photoname;
     const cle_ET = require("crypto").randomBytes(61).toString("hex")
-    M.cle_Etudiant = cle_ET
+    matiere.cle_Etudiant = cle_ET
     matiere.save().then(()=>{
         res.send("ok");
     }).catch(()=>{
