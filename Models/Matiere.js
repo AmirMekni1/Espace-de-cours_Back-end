@@ -5,6 +5,7 @@ const MatiereModel = mongo.model("Matiere",{
     Email             :     {type : String, default : "" },
     NomMatier         :     {type : String, default : "" },
     image             :     {type : String, default : "" },
+    Classe             :     {type : String, default : "" },
     cle_Etudiant      :     {type : String, default : "" }
 });
 module.exports = MatiereModel

@@ -2,7 +2,7 @@ const exp = require('express');
 const Shema_Etudiant = require("./Route/R_Etudiant");  
 const Shema_Enseignant = require("./Route/R_Enseignant"); 
 const schema_Matiere = require("./Route/R_Matiere.js");
-const schema_Classe = require("./Route/R_Classe.js");
+const schema_Document = require("./Route/R_Document.js");
 const session = require('express-session');
 const cors = require('cors');
 require("./Connexion/DataBase");         
@@ -23,11 +23,11 @@ app.use(session({
 
 app.use("/GetImage",exp.static("./Images"))
 app.use("/GetImageMatiere",exp.static("./ImagesMatiere"))
-app.use("/GetImageClasse",exp.static("./ImagesClasse"))
+app.use("/GetImageDocument",exp.static("./Files"))
 app.use("/Etudiant",Shema_Etudiant);
 app.use("/Enseignant",Shema_Enseignant);
 app.use("/Matiere",schema_Matiere);
-app.use("/Classe",schema_Classe);
+app.use("/Document",schema_Document);
 app.listen(3000,()=>{
     console.log("server work");
 })

@@ -1,7 +1,7 @@
 const exp = require('express');
-const router_Classe =exp.Router();
+const router_Document =exp.Router();
 const mult = require("multer");
-const Classe = require("../Models/Classe")
+const Document = require("../Models/Document")
 const https = require('https');
 const jwt = require("jsonwebtoken");
 
@@ -18,7 +18,7 @@ const jwt = require("jsonwebtoken");
 
 photoname = "";
 const mystorge = mult.diskStorage({
-    destination: './ImagesClasse',
+    destination: './Files',
     filename: (req, photo, redirect) => {
         L_date = Date.now();
         let f1 = L_date + "." + photo.mimetype.split('/')[1];
@@ -27,7 +27,7 @@ const mystorge = mult.diskStorage({
     }
 });
 
-
+ const upload = mult({ storage: mystorge });
 //______________________________________________________________________________________________________________________________________________
 
 function authenticateToken(req, res, next) {
@@ -44,15 +44,16 @@ function authenticateToken(req, res, next) {
     });
   }
 
-const upload = mult({ storage: mystorge });
+
 
 //______________________________________________________________________________________________________________________________________________
-//ajouter Classe
-router_Classe.post("/ajouterClasse", upload.any('img'),authenticateToken,  (req, res) => {
+//ajouter Document
+router_Document.post("/AjouterDoucument", upload.any('img'),  (req, res) => {
     const data = req.body;
-    const po = new Classe(data);
-    po.image=photoname;
+    const po = new Document(data);
+    po.Fichier=photoname;
     po.save().then(()=>{
+        photoname=""
         res.send("ok");
     }).catch(()=>{
         res.send("erreur");
@@ -63,19 +64,20 @@ router_Classe.post("/ajouterClasse", upload.any('img'),authenticateToken,  (req,
 //______________________________________________________________________________________________________________________________________________
 
 
-//lister Classes
-router_Classe.get("/Lister", (req, res) => {
-    Classe.find().then((result) => {
-        res.send(result);
+//lister Documents
+router_Document.get("/Lister/:Email", async (req, res) => {
+
+    await Document.find({Email:req.params.Email}).then((result) => {
+        res.status(200).send(result);
     }).catch(() => {
-        res.send('error');
+        res.status(500).send('error');
     });
 });
 
 //______________________________________________________________________________________________________________________________________________
-    router_Classe.get("/GetAllCardClasse/:id",authenticateToken, async (req, res) => {
+    router_Document.get("/GetAllCardDocument/:id",authenticateToken, async (req, res) => {
         
-           await Classe.find({Email : req.params.id}).then((d)=>{
+           await Document.find({Email : req.params.id}).then((d)=>{
             res.status(200).send(d)
            }).catch((e)=>{
             res.status(500).send(e)
@@ -85,8 +87,8 @@ router_Classe.get("/Lister", (req, res) => {
 
 //______________________________________________________________________________________________________________________________________________
 
-router_Classe.delete("/deleteClasse/:id/:photo",authenticateToken, async (req,res)=>{
-const x = await Classe.findOneAndDelete({Email : req.params.id, image : req.params.photo })
+router_Document.delete("/deleteDocument/:id/:photo",authenticateToken, async (req,res)=>{
+const x = await Document.findOneAndDelete({Email : req.params.id, image : req.params.photo })
 if(x){
     res.status(200).send({Message : "ok"})
 }else{
@@ -115,4 +117,4 @@ if(x){
 //______________________________________________________________________________________________________________________________________________
 //______________________________________________________________________________________________________________________________________________
 
-module.exports = router_Classe;
+module.exports = router_Document;
