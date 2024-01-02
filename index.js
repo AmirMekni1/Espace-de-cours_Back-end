@@ -21,9 +21,10 @@ app.use(session({
     saveUninitialized: true,
   }));
 
+  
 app.use("/GetImage",exp.static("./Images"))
 app.use("/GetImageMatiere",exp.static("./ImagesMatiere"))
-app.use("/GetImageDocument",exp.static("./Files"))
+app.use("/GetImageDocument",exp.static("./Documents"))
 app.use("/Etudiant",Shema_Etudiant);
 app.use("/Enseignant",Shema_Enseignant);
 app.use("/Matiere",schema_Matiere);
@@ -31,3 +32,5 @@ app.use("/Document",schema_Document);
 app.listen(3000,()=>{
     console.log("server work");
 })
+
+

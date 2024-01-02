@@ -18,18 +18,20 @@ const { model } = require('mongoose');
 photoname = "";
 const mystorge = mult.diskStorage({
     destination: './Images',
-    filename: (req, photo, redirect) => {
+    filename: (req, image, redirect) => {
+        console.log("photo : ",req.body)
         L_date = Date.now();
-        let f1 = L_date + "." + photo.mimetype.split('/')[1];
+        let f1 = L_date + "." + image.mimetype.split('/')[1];
         redirect(null, f1);
         photoname = f1;
+        console.log("photoname : ",photoname)
     }
 });
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
 
-const upload = mult({ storage: mystorge });
+const upload = mult({ storage: mystorge }).single('image');
 
 
 //___________________________________________________________________________________________________________________________________________________________________________
@@ -52,7 +54,7 @@ function authenticateToken(req, res, next) {
 //___________________________________________________________________________________________________________________________________________________________________________
 
 
-router_Enseignant.post("/InscriptionEnseignant", upload.any('img'), (req, res) => {
+router_Enseignant.post("/InscriptionEnseignant", upload, (req, res) => {
 
     let resultat = require("crypto").randomBytes(32).toString("hex")
 
@@ -63,7 +65,7 @@ router_Enseignant.post("/InscriptionEnseignant", upload.any('img'), (req, res) =
     po = new N_Enseignant(data);
     M = new Matiere()
     M.Email = data.Email
-    po.image = photoname;
+    po.image = req.file.filename;
     po.MédiasSociaux.SiteWeb    ="www.Exemple-SiteWeb.com"
     po.MédiasSociaux.GitHub     ="www.Exemple-GitHub.com"
     po.MédiasSociaux.Twitter    ="www.Exemple-Twitter.com"
@@ -218,7 +220,9 @@ router_Enseignant.get("/RecupererMatiereEnseignant/:id", authenticateToken, asyn
 
 
 
-router_Enseignant.put('/MiseAjourProfile',authenticateToken, async (req, res) => {
+router_Enseignant.put('/MiseAjourProfile',upload, async (req, res) => {
+    
+    console.log("photoname",req.file.filename)
   const identifiant = req.params.id;
   const dat = req.body;
   try {
@@ -232,7 +236,8 @@ router_Enseignant.put('/MiseAjourProfile',authenticateToken, async (req, res) =>
           'MédiasSociaux.Instagram': dat.Instagram,
           'MédiasSociaux.Facebook' : dat.Facebook,
            NomPrenom               : dat.NomPrenom,
-           Telephone               : dat.Telephone
+           Telephone               : dat.Telephone,
+           
           // Ajoutez d'autres champs si nécessaire
         },
            
@@ -241,6 +246,8 @@ router_Enseignant.put('/MiseAjourProfile',authenticateToken, async (req, res) =>
     );
 
     if (updatedEnseignant) {
+        updatedEnseignant.image = req.file.filename;
+        updatedEnseignant.save()
       res.status(200).json({ MyTokenn: 'true', updatedEnseignant });
     } else {
       res.status(404).json({ MyTokenn: 'false', message: 'Enseignant non trouvé' });
@@ -298,6 +305,34 @@ router_Enseignant.delete('/SupprimerMatiereEnseignant/:id/:M',authenticateToken,
 
 //___________________________________________________________________________________________________________________________________________________________________________
 
+router_Enseignant.get('/search/:query', async (req, res) => {
+    const query = req.params.query;
+  
+    try {
+      const results = await N_Enseignant.find({
+        $or: [
+          {NomPrenom : { $regex: query, $options: 'i' } }, // i: insensible à la casse
+          {Email : { $regex: query, $options: 'i' } },
+          {Mot_De_Pass : { $regex: query, $options: 'i' } },
+          {Verification : { $regex: query, $options: 'i' } },
+          {Role : { $regex: query, $options: 'i' } },
+          {image : { $regex: query, $options: 'i' } },
+          {CDCE : { $regex: query, $options: 'i' } },
+          {RESET : { $regex: query, $options: 'i' } },
+          {RESET_EXP : { $regex: query, $options: 'i' } },
+          {Telephone : { $regex: query, $options: 'i' } },
+          {MatiereEn : { $regex: query, $options: 'i' } },
+          {MédiasSociaux : { $regex: query, $options: 'i' } },
+          // Ajoutez d'autres champs de recherche au besoin
+        ],
+      }).exec();
+  
+      res.json(results);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
 
 //___________________________________________________________________________________________________________________________________________________________________________
 

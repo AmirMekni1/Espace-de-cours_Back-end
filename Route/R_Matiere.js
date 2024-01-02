@@ -69,7 +69,7 @@ router_Matiere.get("/Lister", (req, res) => {
 
 //______________________________________________________________________________________________________________________________________________
     router_Matiere.get("/GetAllCardMatiere/:id",authenticateToken, async (req, res) => {
-        
+        console.log()
            await Matiere.find({Email : req.params.id}).then((d)=>{
             res.status(200).send(d)
            }).catch((e)=>{
@@ -80,16 +80,37 @@ router_Matiere.get("/Lister", (req, res) => {
 
 //______________________________________________________________________________________________________________________________________________
 
-router_Matiere.delete("/deleteMatiere/:id/:photo",authenticateToken, async (req,res)=>{
-const x = await Matiere.findOneAndDelete({Email : req.params.id, image : req.params.photo })
+router_Matiere.delete("/deleteMatiere/:id",authenticateToken, async (req,res)=>{
+const x = await Matiere.findOneAndDelete({cle_Etudiant : req.params.id })
 if(x){
     res.status(200).send({Message : "ok"})
 }else{
     res.status(500).send({Message : "erreur"})
 }
 })
+
 //______________________________________________________________________________________________________________________________________________
 
+router_Matiere.get('/search/:query', async (req, res) => {
+    const query = req.params.query;
+  
+    try {
+      const results = await Matiere.find({
+        $or: [
+          {NomMatier : { $regex: query, $options: 'i' } }, // i: insensible à la casse
+          {Email : { $regex: query, $options: 'i' } },
+          {image : { $regex: query, $options: 'i' } },
+          {Classe : { $regex: query, $options: 'i' } },
+          {cle_Etudiant : { $regex: query, $options: 'i' } },
+        ],
+      }).exec();
+  
+      res.json(results);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
 
 //______________________________________________________________________________________________________________________________________________
 //______________________________________________________________________________________________________________________________________________
