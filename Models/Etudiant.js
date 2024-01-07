@@ -10,7 +10,15 @@ const EtudiantModel = mongo.model("Etudiant",{
     CDCE          :     {type : String},
     RESET         :     {type : String , default : ""},
     RESET_EXP     :     {type : Date},
-   
+    Telephone     :     {},
+    MatiereET         :     [ String ],
+    MédiasSociaux     :     {
+        SiteWeb        :   {type : String , default : ""} ,  
+        GitHub         :   {type : String , default : ""} ,  
+        Twitter        :   {type : String , default : ""} ,  
+        Instagram      :   {type : String , default : ""} ,  
+        Facebook       :   {type : String , default : ""}   
+    }
 });
 
 module.exports = EtudiantModel;

@@ -72,7 +72,7 @@ router_Enseignant.post("/InscriptionEnseignant", upload, (req, res) => {
     po.MédiasSociaux.Instagram  ="www.Exemple-Instagram.com"
     po.MédiasSociaux.Facebook   ="www.Exemple-Facebook.com"
     po.CDCE = resultat
-    po.RESET_EXP = Date.now()
+    po.RESET_EXP = Date.now()+36000
     po.save().then(() => {
         M.save()
         photoname = "";
@@ -130,7 +130,7 @@ router_Enseignant.get("/Lister/:id",authenticateToken, (req, res) => {
 
 router_Enseignant.post("/verifierEmail/:id", async (req, res) => {
     const cle = req.params.id
-    const ok = await N_Enseignant.findOne({ CDCE: cle })
+    const ok = await N_Enseignant.findOne({ CDCE: cle , RESET_EXP : {$gt : Date.now() } })
     if (ok) {
         ok.Verification = "true"
         ok.save()
@@ -246,7 +246,10 @@ router_Enseignant.put('/MiseAjourProfile',upload, async (req, res) => {
     );
 
     if (updatedEnseignant) {
-        updatedEnseignant.image = req.file.filename;
+        if (photoname != ""){
+            updatedEnseignant.image = photoname
+          }
+       
         updatedEnseignant.save()
       res.status(200).json({ MyTokenn: 'true', updatedEnseignant });
     } else {
@@ -311,7 +314,7 @@ router_Enseignant.get('/search/:query', async (req, res) => {
     try {
       const results = await N_Enseignant.find({
         $or: [
-          {NomPrenom : { $regex: query, $options: 'i' } }, // i: insensible à la casse
+          {NomPrenom : { $regex: query, $options: 'i' } }, 
           {Email : { $regex: query, $options: 'i' } },
           {Mot_De_Pass : { $regex: query, $options: 'i' } },
           {Verification : { $regex: query, $options: 'i' } },
@@ -323,7 +326,6 @@ router_Enseignant.get('/search/:query', async (req, res) => {
           {Telephone : { $regex: query, $options: 'i' } },
           {MatiereEn : { $regex: query, $options: 'i' } },
           {MédiasSociaux : { $regex: query, $options: 'i' } },
-          // Ajoutez d'autres champs de recherche au besoin
         ],
       }).exec();
   

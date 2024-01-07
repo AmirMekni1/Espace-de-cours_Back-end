@@ -59,8 +59,8 @@ router_Matiere.post("/ajouterMatiere", upload.any('img'),authenticateToken,  (re
 
 
 //lister matieres
-router_Matiere.get("/Lister", (req, res) => {
-    Matiere.find().then((result) => {
+router_Matiere.get("/Lister/:id", (req, res) => {
+    Matiere.find({cle_Etudiant:req.params.id},{Les_Etudiants : 1}).then((result) => {
         res.send(result);
     }).catch(() => {
         res.send('error');

@@ -131,10 +131,6 @@ router_Document.delete("/deleteDocument/:id", authenticateToken, async (req, res
 router_Document.put('/MiseAjourDocument/:id', upload, async (req, res) => {
   const documentId = req.params.id;
   const newData = req.body;
-  console.log("d,,,,", photoname)
-
-  console.log(newData)
- 
 
     const updatedDocument = await Document.findByIdAndUpdate(
       documentId,
@@ -143,7 +139,10 @@ router_Document.put('/MiseAjourDocument/:id', upload, async (req, res) => {
     );
 
     if (updatedDocument) {
-      updatedDocument.Fichier = req.file.filename
+      if (photoname != ""){
+        updatedDocument.Fichier = photoname
+      }
+      
       updatedDocument.save()
       res.status(200).json({ message: 'Document mis à jour avec succès', updatedDocument });
     } else {

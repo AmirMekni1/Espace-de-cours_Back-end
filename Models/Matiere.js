@@ -8,7 +8,7 @@ const MatiereModel = mongo.model("Matiere",{
     image             :     {type : String, default : "" },
     Classe            :     {type : String, default : "" },
     cle_Etudiant      :     {type : String, default : "" },
-    Etudiants         :     [String],
+    Les_Etudiants     :     []
     
 });
 module.exports = MatiereModel

@@ -6,6 +6,8 @@ const DocumentModel = mongo.model("Document",{
     DateLimitte     :     {},
     Fichier         :     {},
     texte           :     {},
-    Commentaire       :     []
+    Commentaire     :     [],
+    NomPrenom       :      {},
+    image           :       {}
 });
 module.exports = DocumentModel
