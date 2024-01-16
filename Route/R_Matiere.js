@@ -41,7 +41,7 @@ const upload = mult({ storage: mystorge });
 
 //______________________________________________________________________________________________________________________________________________
 //ajouter matiere
-router_Matiere.post("/ajouterMatiere", upload.any('img'),authenticateToken,  (req, res) => {
+router_Matiere.post("/ajouterMatiere",authenticateToken, upload.any('img'),  (req, res) => {
     const data = req.body;
     const matiere = new Matiere(data);
     matiere.image=photoname;
